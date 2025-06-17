@@ -1,0 +1,139 @@
+DROP TABLE Delivery CASCADE CONSTRAINTS;
+DROP TABLE Review CASCADE CONSTRAINTS;
+DROP TABLE Payment CASCADE CONSTRAINTS;
+DROP TABLE Order_Item CASCADE CONSTRAINTS;
+DROP TABLE Order_Details CASCADE CONSTRAINTS;
+DROP TABLE Cart CASCADE CONSTRAINTS;
+DROP TABLE Menu_Item CASCADE CONSTRAINTS;
+DROP TABLE Restaurant CASCADE CONSTRAINTS;
+DROP TABLE Customer CASCADE CONSTRAINTS;
+DROP TABLE Address CASCADE CONSTRAINTS;
+
+
+CREATE TABLE Address (
+    Address_ID VARCHAR2(200) PRIMARY KEY,
+    Address VARCHAR2(255) NOT NULL,
+    Latitude NUMBER(10, 6) NOT NULL,
+    Longitude NUMBER(10, 6) NOT NULL
+);
+
+CREATE TABLE Customer (
+    Customer_ID VARCHAR2(200) PRIMARY KEY,
+    Name VARCHAR2(100) NOT NULL,
+    Email VARCHAR2(100) UNIQUE NOT NULL,
+    Phone_Number VARCHAR2(20) UNIQUE NOT NULL,
+    Password VARCHAR2(255) NOT NULL,
+    Address_ID VARCHAR2(200),
+    CONSTRAINT FK_Customer_Address FOREIGN KEY (Address_ID) REFERENCES Address(Address_ID) ON DELETE CASCADE
+);
+
+CREATE TABLE Restaurant (
+    Restaurant_ID VARCHAR2(200) PRIMARY KEY,
+    Restaurant_Name VARCHAR2(100) NOT NULL,
+    Address_ID VARCHAR2(200) UNIQUE NOT NULL,
+    Opening_Hours VARCHAR2(50) NOT NULL,
+    Closing_Hours VARCHAR2(50) NOT NULL,
+    Contact_Number VARCHAR2(20) NOT NULL,
+    CONSTRAINT FK_Restaurant_Address FOREIGN KEY (Address_ID) REFERENCES Address(Address_ID) ON DELETE CASCADE
+);
+
+CREATE TABLE Menu_Item (
+    Item_ID VARCHAR2(200) PRIMARY KEY,
+    Restaurant_ID VARCHAR2(200) NOT NULL,
+    Item_Name VARCHAR2(100) NOT NULL,
+    Description VARCHAR2(255),
+    Price NUMBER(10, 2) NOT NULL,
+    CONSTRAINT FK_MenuItem_Restaurant FOREIGN KEY (Restaurant_ID) REFERENCES Restaurant(Restaurant_ID) ON DELETE CASCADE
+);
+
+CREATE TABLE Cart (
+    Cart_ID VARCHAR2(200) PRIMARY KEY,
+    Customer_ID VARCHAR2(200) NOT NULL,
+    Item_ID VARCHAR2(200) NOT NULL,
+    Quantity NUMBER NOT NULL CHECK (Quantity > 0),
+    CONSTRAINT FK_Cart_Customer FOREIGN KEY (Customer_ID) REFERENCES Customer(Customer_ID) ON DELETE CASCADE,
+    CONSTRAINT FK_Cart_Item FOREIGN KEY (Item_ID) REFERENCES Menu_Item(Item_ID) ON DELETE CASCADE
+);
+
+CREATE TABLE Order_Details (
+    Order_ID VARCHAR2(200) PRIMARY KEY,
+    Customer_ID VARCHAR2(200) NOT NULL,
+    Restaurant_ID VARCHAR2(200) NOT NULL,
+    Order_Status VARCHAR2(50) CHECK (Order_Status IN ('Pending', 'Delivered', 'Cancelled')),
+    Order_Time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    Restaurant_Address VARCHAR2(100) NOT NULL,
+    Customer_Latitude NUMBER(10, 6) NOT NULL,
+    Customer_Longitude NUMBER(10, 6) NOT NULL,
+    Total_Amount NUMBER(10, 2) NOT NULL,
+    CONSTRAINT FK_Order_Customer FOREIGN KEY (Customer_ID) REFERENCES Customer(Customer_ID) ON DELETE CASCADE,
+    CONSTRAINT FK_Order_Restaurant FOREIGN KEY (Restaurant_ID) REFERENCES Restaurant(Restaurant_ID) ON DELETE CASCADE,
+    CONSTRAINT FK_Order_Restaurant_Address FOREIGN KEY (Restaurant_Address) REFERENCES Address(Address_ID) ON DELETE CASCADE
+);
+
+CREATE TABLE Order_Item (
+    Order_Item_ID VARCHAR2(200) PRIMARY KEY,
+    Order_ID VARCHAR2(200) NOT NULL,
+    Item_ID VARCHAR2(200) NOT NULL,
+    Quantity NUMBER NOT NULL CHECK (Quantity > 0),
+    Price NUMBER(10, 2) NOT NULL,
+    CONSTRAINT FK_OrderItem_Order FOREIGN KEY (Order_ID) REFERENCES Order_Details(Order_ID) ON DELETE CASCADE,
+    CONSTRAINT FK_OrderItem_Item FOREIGN KEY (Item_ID) REFERENCES Menu_Item(Item_ID) ON DELETE CASCADE
+);
+
+CREATE TABLE Payment (
+    Payment_ID VARCHAR2(200) PRIMARY KEY,
+    Order_ID VARCHAR2(200) NOT NULL,
+    Payment_Status VARCHAR2(50) CHECK (Payment_Status IN ('Success', 'Failed', 'Pending')),
+    Payment_Time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT FK_Payment_Order FOREIGN KEY (Order_ID) REFERENCES Order_Details(Order_ID) ON DELETE CASCADE
+);
+
+CREATE TABLE Review (
+    Review_ID VARCHAR2(200) CONSTRAINT Review_PK PRIMARY KEY,
+    Customer_ID VARCHAR2(200),
+    Restaurant_ID VARCHAR2(200),
+    Rating NUMBER(2,1) CONSTRAINT Review_Check CHECK (Rating BETWEEN 1 AND 5),
+    Review_Text VARCHAR2(1000),
+    Review_Date DATE,
+    CONSTRAINT FK_Review_Customer FOREIGN KEY (Customer_ID) REFERENCES Customer(Customer_ID) ON DELETE CASCADE,
+    CONSTRAINT FK_Review_Restaurant FOREIGN KEY (Restaurant_ID) REFERENCES Restaurant(Restaurant_ID) ON DELETE CASCADE
+);
+
+CREATE TABLE Delivery (
+    Delivery_ID VARCHAR2(200) CONSTRAINT Delivery_PK PRIMARY KEY,
+    Order_ID VARCHAR2(200),
+    Agent_Location_ID VARCHAR2(200) NOT NULL,
+    Delivery_Status VARCHAR2(50) CHECK (Delivery_Status IN ('Pending', 'On the Way', 'Delivered')),
+    Delivery_Time TIMESTAMP,
+    CONSTRAINT FK_Agent_Address FOREIGN KEY (Agent_Location_ID) REFERENCES Address(Address_ID) ON DELETE CASCADE,
+    CONSTRAINT FK_Delivery_Order FOREIGN KEY (Order_ID) REFERENCES Order_Details(Order_ID) ON DELETE CASCADE
+);
+
+COMMIT;
+DROP SEQUENCE order_id_seq;
+
+CREATE SEQUENCE order_id_seq
+START WITH 1
+INCREMENT BY 1
+NOCACHE
+NOCYCLE;
+
+DROP SEQUENCE order_item_id_seq;
+
+CREATE SEQUENCE order_item_id_seq
+START WITH 1
+INCREMENT BY 1
+NOCACHE
+NOCYCLE;
+
+DROP SEQUENCE cart_id_seq;
+
+CREATE SEQUENCE cart_id_seq START WITH 1 INCREMENT BY 1 NOCACHE NOCYCLE;
+
+DROP SEQUENCE review_seq;
+
+CREATE SEQUENCE review_seq
+  START WITH 1
+  INCREMENT BY 1
+  NOCACHE
+  NOCYCLE;
