@@ -1,1 +1,1 @@
-const String myurl = "http://3.224.93.85:5000";
+const String myurl = "YOUR_BASIC_URL";

@@ -83,7 +83,7 @@ class _PersistentOSMDeliveryMapState extends State<PersistentOSMDeliveryMap> wit
       return;
     }
 
-    const apiKey = '5b3ce3597851110001cf62480492eeeace504633beb00781de0fdf1a';
+    const apiKey = 'YOUR_API_KEY';
     final uri = Uri.parse(
       'https://api.openrouteservice.org/v2/directions/driving-car?api_key=$apiKey&start=${restaurant!.longitude},${restaurant!.latitude}&end=${user!.longitude},${user!.latitude}'
     );

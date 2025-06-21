@@ -1,5 +1,5 @@
 import 'dart:async';
-
+import 'package:Savor_Go/screens/url.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:razorpay_flutter/razorpay_flutter.dart';
@@ -15,7 +15,6 @@ class PaymentScreen extends StatefulWidget {
 
 
   // Update this to match your local or production backend IP
-  final String BASE_URL = "http://3.224.93.85:5000";
 
   const PaymentScreen({
     Key? key,
@@ -49,7 +48,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
   }
 
   Future<String?> placeOrder(String customerId) async {
-    final url = Uri.parse('${widget.BASE_URL}/order/place');
+    final url = Uri.parse('${myurl}/order/place');
     try {
       final response = await http.post(
         url,
@@ -71,7 +70,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
   }
 
   Future<void> sendPaymentConfirmation(String orderId, String razorpayPaymentId) async {
-    final url = Uri.parse('${widget.BASE_URL}/payment');
+    final url = Uri.parse('${myurl}/payment');
     try {
       final response = await http.post(
         url,
@@ -111,7 +110,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
     if (!delivered) {
       try {
         final response = await http.post(
-          Uri.parse('${widget.BASE_URL}/track_order/update'),
+          Uri.parse('${myurl}/track_order/update'),
           headers: {'Content-Type': 'application/json'},
           body: jsonEncode({'orderId': orderId}),
         );
@@ -184,7 +183,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
 
       try {
         final response = await http.post(
-          Uri.parse('${widget.BASE_URL}/track_order/update'),
+          Uri.parse('${myurl}/track_order/update'),
           headers: {'Content-Type': 'application/json'},
           body: jsonEncode({'orderId': currentOrderId!}),
         );
